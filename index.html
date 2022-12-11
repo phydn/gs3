@@ -226,7 +226,7 @@ block.prototype.draw = function() {
 	if (this.type == "yorb"){
 		ctx.drawImage(yorbimg,this.x-scx,this.y-scy,40,40);
 		if (spacedown == 1 && hx+hh > this.x-scx && hx < this.x+40-scx && hy > this.y && hy < this.y + 40){
-			if (this.yboost == 0){pvy = pacc-2; this.yboost = 1; pjumping = 1;}
+			if (this.yboost == 0){pvy = pacc-2; this.yboost = 1; pjumping = 1; spacedown = 0;}
 			if (this.yboost == 1){
 				hy+=pvy; pvy-=0.1;
 			}
@@ -235,7 +235,7 @@ block.prototype.draw = function() {
 	if (this.type == "porb"){
 		ctx.drawImage(porbimg,this.x-scx,this.y-scy,40,40);
 		if (spacedown == 1 && hx+hh > this.x-scx && hx < this.x+40-scx && hy > this.y && hy < this.y + 40){
-			if (this.yboost == 0){pvy = pacc+2; this.yboost = 1; pjumping = 1;}
+			if (this.yboost == 0){pvy = pacc+2; this.yboost = 1; pjumping = 1; spacedown = 0;}
 			if (this.yboost == 1){
 				hy+=pvy; pvy-=0.1;
 			}
@@ -246,7 +246,7 @@ block.prototype.draw = function() {
 		if (this.used == 0 && spacedown == 1 && hx+hh > this.x-scx && hx < this.x+40-scx && hy > this.y && hy < this.y + 40){
 			let storepdir = pdir;
 			if (storepdir == 1){pdir = -1;}else{pdir = 1;}
-			this.used = 1;
+			this.used = 1; spacedown = 0;
 		}
 	}
 	if (this.type == "gyorb"){
@@ -340,7 +340,7 @@ blockArray.push(new block(790+40*8,242,200,100,"boxNC",100,0,0,1));
 var inton = 0;
 var myVar3 = setInterval(updateMove,50);
 //GUI------------------------------------------
-var showguides = 1;
+var showguides = 0;
 //SCENE--------------------------------------------------
 var scx = 0;
 var scy = -30;
@@ -368,6 +368,33 @@ function clickfunc(){
 if (scene == "start"){
 	BGmusic.play();
 	scene = "level";
+}
+if (scene == "level"){
+	if (pjumping == 0){spacedown = 1; pjumping = 1;}
+	if (pdead == 1){
+				scx = 0;
+				scy = -30;
+				hx = 200;
+				hy = 244;
+				hw = 40;
+				hh = 40;
+
+				pdead = 0;
+				pspeed = 6;
+				pground = 284;
+				pboostvy = 0;
+				pfallv = 10;
+				pjumping = 0; pacc = -19; pvy = pacc; 
+				pdir = 1;
+				BGmusic.currentTime = 0; BGmusic.play();
+				
+				for (let i = 0; i < blockArray.length ; i++) {
+					blockArray[i].used = 0;
+					blockArray[i].yboost = 0;
+				}
+
+				pdead = 0; 
+			}
 }
 nodown = 0;
 }//End clickfunc
@@ -399,6 +426,8 @@ if (showguides == 1){
 }
 
 //Player 
+ctx.strokeStyle = "cyan"; ctx.lineWidth = 2;
+ctx.strokeRect(hx,hy-scy,hw,hh);
 ctx.fillStyle = "#7a34eb"; 
 ctx.fillRect(hx,hy-scy,hw,hh);
 
