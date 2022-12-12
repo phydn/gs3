@@ -136,7 +136,9 @@ var block = function(x,y,w,h,type,pully,csx,cex,dir) {
 
 block.prototype.draw = function() {
 	if (this.type == "box"){
-		ctx.strokeStyle = "white"; ctx.lineWidth = 3;
+		ctx.strokeStyle = "white"; 
+		if (showguides == 1 && this.dir == -1){ctx.strokeStyle = "yellow";}
+		ctx.lineWidth = 3;
 		ctx.strokeRect(this.x-scx,this.y-scy,40,40);
 		ctx.drawImage(blockimg,this.x-scx,this.y-scy,40,40);
 		
@@ -150,8 +152,12 @@ block.prototype.draw = function() {
 			//Top
 			if (hy+hh > this.y){
 				if (hx+hw > this.x+this.csx-scx && hx < this.x+40-this.cex-scx){
-					pground = 284+40-(243-this.y);
+					pground = 284+40-(243-this.y)+2;
 				}
+			}
+			//Side Collision
+			if (hy > this.y && hy+hh <= this.y+80){
+				if (hx+hw > this.x+this.csx-scx && hx < this.x+40-this.cex-scx){pdead = 1;}
 			}
 		}
 		if (pdir == 1 && this.dir == 1){
@@ -186,13 +192,13 @@ block.prototype.draw = function() {
 			ctx.strokeRect(this.x-scx,this.y-scy,this.w,this.h);
 		}
 		//Top
-		if (hy+hh < this.y-scy){
+		if (this.dir == pdir && hy+hh < this.y-scy){
 			if (hx+hw > this.x-scx && hx < this.x+this.w-scx){
 				pground = 284-this.h-(284-this.h-this.y);
 			}
 		}
 		//Side 
-		if (hy > this.y && hy+hh <= this.y+this.h+5){
+		if (this.dir == pdir && hy > this.y && hy+hh <= this.y+this.h+5){
 			if (hx+hw > this.x-scx && hx < this.x+this.w-scx){pdead = 1;}
 		}
 	}
@@ -269,15 +275,32 @@ block.prototype.draw = function() {
 	}
 	if (this.type == "gborb"){
 		if (showguides == 1){
+			if (this.dir == 1){
 			ctx.strokeStyle = "red"; ctx.lineWidth = 3;
 			ctx.strokeRect(this.x+15-scx,this.y+55-scy,40,15);
+			}
+			else{
+			ctx.strokeStyle = "red"; ctx.lineWidth = 3;
+			ctx.strokeRect(this.x+15-scx,this.y-scy,40,15);
+			}
 		}
 		
-		if (hy+hh > this.y+55 && hy+hh <= this.y+55+15){
-		if (hx+hw > this.x+15-scx && hx < this.x+15+40-scx){
-			pjumping = 0; pvy = pacc; pdir = -1;}
+		if (this.dir == 1 && pdir == 1){
+			if (hy+hh > this.y+55 && hy+hh <= this.y+55+20){
+			if (hx+hw > this.x+15-scx && hx < this.x+15+40-scx){
+				pjumping = 0; pvy = pacc; pdir = -1;}
+			}
 		}
-		ctx.drawImage(gborbimg,this.x-scx,this.y-scy,70,70);
+		
+		if (this.dir == -1 && pdir == -1){
+			if (hy+hh > this.y && hy+hh <= this.y+55){
+			if (hx+hw > this.x+15-scx && hx < this.x+15+40-scx){
+				pjumping = 0; pvy = pacc; pdir = 1;}
+			}
+		}
+		
+		if (this.dir == 1){ctx.drawImage(gborbimg,this.x-scx,this.y-scy,70,70);}
+		if (this.dir == -1){ctx.drawImage(aborbimg,this.x-scx,this.y-scy,70,70);}
 	}
 	
 	if (showguides == 1){
@@ -288,27 +311,43 @@ block.prototype.draw = function() {
 
 var blockArray = [];
 
+var levelset = "standard";
+if (levelset == "exp"){
+	blockArray.push(new block(400,242,100,100,"box",100,0,0,1)); 
+	blockArray.push(new block(400+40,242,100,100,"box",100,0,0,1)); 
+	blockArray.push(new block(400+40*2,242,100,100,"box",100,0,0,1)); 
+	
+	blockArray.push(new block(400+23,242-36*2,100,100,"gborb",100,0,0,1)); 
+	
+	blockArray.push(new block(500-40*2,0,100,100,"box",100,0,0,-1));
+	blockArray.push(new block(500-40,0,100,100,"box",100,0,0,-1)); 
+	blockArray.push(new block(500,0,100,100,"box",100,0,0,-1)); 
+	blockArray.push(new block(500+40,0,100,100,"box",100,0,0,-1)); 
+	blockArray.push(new block(500+40*2,0,100,100,"box",100,0,0,-1));
+	blockArray.push(new block(500+40*4,36,100,100,"box",100,0,0,-1));
+	
+	blockArray.push(new block(500+40*8,36*2,100,100,"box",100,0,0,-1));
+	
+	blockArray.push(new block(370+155,40,100,100,"gborb",100,0,0,-1)); 
+}
+
+if (levelset == "standard"){
 blockArray.push(new block(500,243-30,200,100,"gyorb",100,0,0,1)); 
 blockArray.push(new block(500+41*3,240-40*2,200,100,"yorb",100,0,0,1)); 
-
 blockArray.push(new block(500+40*3,243,200,100,"spike",100,0,0,1));
 blockArray.push(new block(500+40*2,243,200,100,"smallspike",100,0,0,1));
-blockArray.push(new block(500+40*4,243,200,100,"smallspike",100,0,0,1));
-
+blockArray.push(new block(500+40*4,243,200,100,"smallspike",100,0,0,1)); //5
 blockArray.push(new block(200+329+40*5,243-40,200,100,"box",100,0,0,1)); 
 blockArray.push(new block(200+329+40*6,243-40,200,100,"box",100,0,0,1));
 blockArray.push(new block(200+329+40*5,243,200,100,"boxNC",100,0,0,1)); 
 blockArray.push(new block(200+329+40*6,243,200,100,"boxNC",100,0,0,1));
-
 blockArray.push(new block(500+41*9,240-40*4,200,100,"porb",100,0,0,1)); //10
  
 blockArray.push(new block(500+40*10,243,200,100,"spike",100,0,0,1));
-
 blockArray.push(new block(840,280,10,100,"invis",100,0,0,1)); 
-
 blockArray.push(new block(500+40*12,240-40*3,200,100,"box",100,0,0,1));
 blockArray.push(new block(500+40*13,240-40*3,200,100,"box",100,0,0,1));
-blockArray.push(new block(500+40*12,240-40*2,200,100,"boxNC",100,0,0,1));
+blockArray.push(new block(500+40*12,240-40*2,200,100,"boxNC",100,0,0,1)); //15
 blockArray.push(new block(500+40*13,240-40*2,200,100,"boxNC",100,0,0,1));
 blockArray.push(new block(500+40*12,240-40*1,200,100,"boxNC",100,0,0,1));
 blockArray.push(new block(500+40*13,240-40*1,200,100,"boxNC",100,0,0,1));
@@ -316,26 +355,37 @@ blockArray.push(new block(500+40*12,240,200,100,"boxNC",100,0,0,1));
 blockArray.push(new block(500+40*13,240,200,100,"boxNC",100,0,0,1)); //20
 
 blockArray.push(new block(750+41*9,240-40*6,200,100,"borb",100,0,0,1));
+blockArray.push(new block(750+40*13,240-40*8,200,100,"box",100,0,0,-1));
 blockArray.push(new block(750+40*12,240-40*8,200,100,"box",100,0,0,-1));
 blockArray.push(new block(750+40*11,240-40*8,200,100,"box",100,0,0,-1));
-blockArray.push(new block(750+40*10,240-40*8,200,100,"box",100,0,0,-1));
+blockArray.push(new block(750+40*10,240-40*8,200,100,"box",100,0,0,-1)); //25
+blockArray.push(new block(1232+41,240-40*7,200,100,"invspike",100,0,0,1));
+blockArray.push(new block(750+41*13,240-40*5,200,100,"borb",100,0,0,1));
+blockArray.push(new block(750+40*16,240-40*2,200,100,"spike",100,0,0,1));
+blockArray.push(new block(750+40*15,240-40*1,200,100,"box",100,0,0,1));
+blockArray.push(new block(750+40*14,240-40*1,200,100,"box",100,0,0,1)); //30
 
-blockArray.push(new block(1232,240-40*7,200,100,"invspike",100,0,0,1));
-blockArray.push(new block(750+41*12,240-40*5,200,100,"borb",100,0,0,1));
-
-blockArray.push(new block(750+40*15,240-40*2,200,100,"spike",100,0,0,1));
-blockArray.push(new block(750+40*15,240-40*1,200,100,"boxNC",100,0,0,1));
-blockArray.push(new block(750+40*14,240-40*1,200,100,"box",100,0,0,1));
 blockArray.push(new block(750+40*13,240-40*1,200,100,"box",100,0,0,1));
 blockArray.push(new block(750+40*12,240-40*1,200,100,"box",100,0,0,1));
+blockArray.push(new block(-12+765+40*17,241,200,100,"box",100,0,0,1));
+blockArray.push(new block(-12+765+40*18,241,200,100,"box",100,0,0,1));
+blockArray.push(new block(-12+765+40*19,241,200,100,"box",100,0,0,1)); //35
+blockArray.push(new block(750+40*16,240-40*1,200,100,"boxNC",100,0,0,1));
+blockArray.push(new block(840+257,220,100,100,"invis",100,0,0,1));
+blockArray.push(new block(1100,160,100,100,"spike",100,0,0,1));
+blockArray.push(new block(1100+40,160,100,100,"spike",100,0,0,1));
+blockArray.push(new block(1100+40,160+40,100,100,"boxNC",100,0,0,1)); //40
 
-blockArray.push(new block(765+40*17,240,200,100,"box",100,0,0,1));
-blockArray.push(new block(765+40*18,240,200,100,"box",100,0,0,1));
-blockArray.push(new block(765+40*19,240,200,100,"box",100,0,0,1));
-
-blockArray.push(new block(790+40*8,242-41,200,100,"boxNC",100,0,0,1));
-blockArray.push(new block(790+40*8,242,200,100,"boxNC",100,0,0,1));
-
+blockArray.push(new block(1100+40,160+40*2,100,100,"boxNC",100,0,0,1));
+blockArray.push(new block(1100,160+40,100,100,"boxNC",100,0,0,1));
+blockArray.push(new block(1100,160+40*2,100,100,"boxNC",100,0,0,1));
+blockArray.push(new block(750+40*9,240-40*8,200,100,"box",100,0,0,-1));
+blockArray.push(new block(750+40*12,242,200,100,"boxNC",100,0,0,1)); //45
+blockArray.push(new block(750+40*13,242,200,100,"boxNC",100,0,0,1));
+blockArray.push(new block(750+40*14,242,200,100,"boxNC",100,0,0,1));
+blockArray.push(new block(750+40*15,242,200,100,"boxNC",100,0,0,1));
+blockArray.push(new block(750+40*16,242,200,100,"boxNC",100,0,0,1));
+}
 //INTERVAL------------------------------------------
 var inton = 0;
 var myVar3 = setInterval(updateMove,50);
@@ -358,6 +408,7 @@ var pfallv = 10;
 var pjumping = 0; var pacc = -19; var pvy = pacc; 
 var pdir = 1;
 
+var clicktriggered = 0;
 var moveCam = 0;
 //ADJ-------------------------------------------------
 //scene = "level"; scx = 660; scy = -100; hx = 200; hy = 24;
@@ -370,7 +421,7 @@ if (scene == "start"){
 	scene = "level";
 }
 if (scene == "level"){
-	if (pjumping == 0){spacedown = 1; pjumping = 1;}
+	spacedown = 1; pjumping = 1; clicktriggered = 1;
 	if (pdead == 1){
 				scx = 0;
 				scy = -30;
@@ -386,6 +437,7 @@ if (scene == "level"){
 				pfallv = 10;
 				pjumping = 0; pacc = -19; pvy = pacc; 
 				pdir = 1;
+				spacedown = 0; clicktriggered = 0;
 				BGmusic.currentTime = 0; BGmusic.play();
 				
 				for (let i = 0; i < blockArray.length ; i++) {
@@ -407,8 +459,8 @@ ctx.fillRect(0,0,800,400);
 
 //Scenes
 if (scene == "level"){
-ctx.drawImage(levelBG,0-scx/5,0,2400,400); 
-ctx.drawImage(levelBG,0-scx/5,400,2400,400);
+if (clicktriggered > 0){clicktriggered++; if (clicktriggered > 10){clicktriggered = 0; spacedown = 0;}}
+//ctx.drawImage(levelBG,0-scx/5,0,2400,400); 
 ctx.drawImage(levelGROUND,0,0-scy,800,400);
 
 //Level Guides
@@ -433,11 +485,10 @@ ctx.fillRect(hx,hy-scy,hw,hh);
 
 if (pdead == 0){
 	scx+=pspeed;
-	ctx.font = "700 20px Arial"; ctx.fillStyle = "black"; ctx.textAlign = "center";
-	ctx.fillText(hy+hh-scy-284,136,53-state+0);
 	
+	//Camera
 	if (hy+hh-scy-284 < -100){scy-=1;}
-	if (hy+hh-scy-284 > 30){scy+=1;}
+	if (hy+hh-scy-284 > 10){scy+=1;}
 	
 	if (pdir == 1 && pjumping == 1){
 		hy+=pvy; pvy+=2;
@@ -453,7 +504,7 @@ if (pdead == 0){
 	
 	
 	if (pdir == -1 && pjumping == 0 && hy+hh > pground){
-		hy-=pfallv;
+		hy-=10;
 	}
 	
 	if (pdir == 1 && pjumping == 0 && hy+hh < pground){
@@ -505,7 +556,7 @@ if (inton == 1){}
 var demo1ext = ""; var demo2ext = "";
 function outprint() {
 	//Demo 1 & 2
-	demo1ext = "|pjumping: " + pjumping + "|pvy: " + Math.round(pvy) + "|pdead: " + pdead;
+	demo1ext = "|pjumping: " + pjumping + "|pvy: " + Math.round(pvy) + "|pdead: " + pdead + "|spacedown: " + spacedown;
 	if (guion == 1){document.getElementById("demo1").innerHTML = "|X: " + canvasX + "| Y: " + canvasY + "| Scene: " + scene + "|scx: " + Math.round(scx) + "|scy: " + Math.round(scy) + "|pground: " + pground + "|hy: " + Math.round(hy) + "|pdir: " + pdir; document.getElementById("demo1").innerHTML += demo1ext;}
 	if (guion == 1){document.getElementById("demo2").innerHTML = ""; document.getElementById("demo2").innerHTML += demo2ext;}
 	
@@ -636,6 +687,7 @@ window.addEventListener("keyup", checkKeyReleased, false);
 var arrayInsert = "Array";
 var spacedown = 0;
 function checkKeyPressed(evt) {
+	if (evt.keyCode == "82"){pdead = 1;}
 	if (evt.keyCode == "192"){
 		showguides++; if (showguides > 1){showguides = 0;}
 	}
@@ -657,6 +709,7 @@ function checkKeyPressed(evt) {
 				pfallv = 10;
 				pjumping = 0; pacc = -19; pvy = pacc; 
 				pdir = 1;
+				spacedown = 0;
 				BGmusic.currentTime = 0; BGmusic.play();
 				
 				for (let i = 0; i < blockArray.length ; i++) {
@@ -761,6 +814,7 @@ function pauseAudio() {
 <img id="gyorbimg"  style="display:none; visibility:hidden;" src="gyorb.png">
 <img id="gporbimg"  style="display:none; visibility:hidden;" src="gporb.png">
 <img id="gborbimg"  style="display:none; visibility:hidden;" src="gborb.png">
+<img id="aborbimg"  style="display:none; visibility:hidden;" src="aborb.png">
 
 <img id="fcheck1"  style="display:none; visibility:hidden;" src="fade/check1.png"><img id="fcheck2"  style="display:none; visibility:hidden;" src="fade/check2.png"><img id="fcheck3"  style="display:none; visibility:hidden;" src="fade/check3.png"><img id="fcheck4"  style="display:none; visibility:hidden;" src="fade/check4.png"><img id="fcheck5"  style="display:none; visibility:hidden;" src="fade/check5.png"><img id="fcheck6"  style="display:none; visibility:hidden;" src="fade/check6.png"><img id="fcheck7"  style="display:none; visibility:hidden;" src="fade/check7.png">
 <img id="error1"  style="display:none; visibility:hidden;" src="fade/error1.png"><img id="error2"  style="display:none; visibility:hidden;" src="fade/error2.png"><img id="error3"  style="display:none; visibility:hidden;" src="fade/error3.png"><img id="error4"  style="display:none; visibility:hidden;" src="fade/error4.png"><img id="error5"  style="display:none; visibility:hidden;" src="fade/error5.png"><img id="error6"  style="display:none; visibility:hidden;" src="fade/error6.png"><img id="error7"  style="display:none; visibility:hidden;" src="fade/error7.png"><img id="error8"  style="display:none; visibility:hidden;" src="fade/error8.png">
